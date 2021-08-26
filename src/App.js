@@ -4,6 +4,7 @@ import Post from './Post';
 import { db, auth } from './firebase';
 import Modal from '@material-ui/core/Modal';
 import { makeStyles, Button, Input } from '@material-ui/core';
+import ImageUpload from './ImageUpload';
 
 function getModalStyle(){
   const top = 50;
@@ -30,6 +31,7 @@ const useStyles = makeStyles((theme) => ({
 function App() {
   const classes = useStyles();
   const [modalStyle] = useState(getModalStyle);
+  const [openSignIn, setOpenSignIn] = useState(false);
   const [posts, setPosts] = useState([]);
   const [open, setOpen] = useState(false)
   const [username, setUsername] = useState('');
@@ -74,12 +76,22 @@ function App() {
       alert(error); 
       console.log(error);
     });
+
+    setOpen(false);
   }
 
+  const signIn = (e) => {
+    e.preventDefault();
+
+    auth.signInWithEmailAndPassword(email, password)
+    .catch(error => alert(error.message));
+
+    setOpenSignIn(false);
+  }
 
   return (
     <div className="App">
-
+      <ImageUpload/>
       <Modal
       open={open}
       onClose={() => setOpen(false)}>
@@ -107,6 +119,29 @@ function App() {
         </div>
       </Modal>
 
+      <Modal
+      open={openSignIn}
+      onClose={() => setOpenSignIn(false)}>
+        <div style={modalStyle} className={classes.paper}>
+          <form className="app__signup">
+            <center>
+              <img className="app__headerImage"
+              src="https://cdn.pixabay.com/photo/2017/03/24/07/28/instagram-2170420_960_720.png"
+              alt="" />
+            </center>
+            <Input
+            type="email"
+            placeholder="email"
+            onChange={(e) => setEmail(e.target.value)}/>
+            <Input
+            type="password"
+            placeholder="password"
+            onChange={(e) => setPassword(e.target.value)}/>
+            <Button type="submit" onClick={signIn}>Sign In</Button>
+          </form>
+        </div>
+      </Modal>
+
       <div className="app__header">
         <img className="app__headerImage"
         src="https://cdn.pixabay.com/photo/2017/03/24/07/28/instagram-2170420_960_720.png"
@@ -115,7 +150,10 @@ function App() {
       { user ? (
         <Button onClick={() => auth.signOut()}>Logout</Button>
       ) : (
-        <Button onClick={() => setOpen(true)}>Sign up</Button>
+        <div className="app__loginContainer">
+          <Button onClick={() => setOpenSignIn(true)}>Sign In</Button>
+          <Button onClick={() => setOpen(true)}>Sign up</Button>
+        </div>
       )}
       
 
